@@ -36,31 +36,13 @@ public class ConnectionDemo {
         properties.put("characterEncoding", "UTF-8");
         properties.put("useUnicode", "true");
 
-        try (Connection connection = DriverManager.getConnection(url, properties);
-             Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
-
-            String sql = "SELECT a_id, a_name FROM authors";
-            ResultSet resultSet = statement.executeQuery(sql);
-
-            List<AuthorBook> authors = new ArrayList<>();
-
-            // insert row
-            resultSet.moveToInsertRow();
-            resultSet.updateInt("a_id", 8);
-            resultSet.updateString("a_name", "Islam Kerimov");
-            resultSet.insertRow();
-            resultSet.moveToCurrentRow();
-            while (resultSet.next()) {
-                // update row
-                int id = resultSet.getInt("a_id");
-                if (id == 4) {
-                    resultSet.updateString("a_name", "777");
-                    resultSet.updateRow();
-                }
-                String name = resultSet.getString("a_name");
-                authors.add(new AuthorBook(id, name));
-            }
-            authors.forEach(System.out::println);
+        try (Connection connection = DriverManager.getConnection(url, properties)) {
+            String sql = "INSERT INTO authors(a_id, a_name) VALUES (?, ?)";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, 9);
+            statement.setString(2, "Erih Remark");
+            int rowsUpdate = statement.executeUpdate();
+            System.out.println(rowsUpdate);
         } catch (SQLException e) {
             e.printStackTrace();
         }
