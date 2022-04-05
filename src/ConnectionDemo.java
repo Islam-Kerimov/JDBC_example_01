@@ -37,14 +37,26 @@ public class ConnectionDemo {
         properties.put("useUnicode", "true");
 
         try (Connection connection = DriverManager.getConnection(url, properties);
-             Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
 
             String sql = "SELECT a_id, a_name FROM authors";
             ResultSet resultSet = statement.executeQuery(sql);
 
             List<AuthorBook> authors = new ArrayList<>();
+
+            // insert row
+            resultSet.moveToInsertRow();
+            resultSet.updateInt("a_id", 8);
+            resultSet.updateString("a_name", "Islam Kerimov");
+            resultSet.insertRow();
+            resultSet.moveToCurrentRow();
             while (resultSet.next()) {
+                // update row
                 int id = resultSet.getInt("a_id");
+                if (id == 4) {
+                    resultSet.updateString("a_name", "777");
+                    resultSet.updateRow();
+                }
                 String name = resultSet.getString("a_name");
                 authors.add(new AuthorBook(id, name));
             }
